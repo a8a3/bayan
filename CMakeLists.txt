@@ -9,6 +9,7 @@ endif()
 find_package(Boost
         COMPONENTS
         program_options
+        filesystem
         unit_test_framework
         REQUIRED)
 
@@ -23,6 +24,7 @@ set_target_properties(bayan PROPERTIES
 target_link_libraries(bayan
     PRIVATE
         Boost::program_options
+        Boost::filesystem
 )
 
 target_include_directories(bayan_tests
