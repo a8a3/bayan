@@ -20,6 +20,11 @@ set_target_properties(bayan PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
+target_link_libraries(bayan
+    PRIVATE
+        Boost::program_options
+)
+
 target_include_directories(bayan_tests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/sources
