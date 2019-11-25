@@ -10,6 +10,7 @@ find_package(Boost
         COMPONENTS
         program_options
         filesystem
+        regex
         unit_test_framework
         REQUIRED)
 
@@ -25,17 +26,20 @@ target_link_libraries(bayan
     PRIVATE
         Boost::program_options
         Boost::filesystem
+        Boost::regex
 )
 
 target_include_directories(bayan_tests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/sources
-        ${Boost_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIRS}        
 )
 
 target_link_libraries(bayan_tests
     PRIVATE
         Boost::unit_test_framework
+        Boost::filesystem
+        Boost::regex
 )
 
 target_compile_definitions(bayan_tests

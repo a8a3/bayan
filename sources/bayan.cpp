@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
       ("exclude-dirs,E", po::value<std::vector<std::string>>(&o.excl_dirs_),   "exclude directories for scan")
       ("recursive,R",    po::value<int>(&o.recursive_),                        "0- scan current directory, 1- recursive scan")
       ("min-size,B",     po::value<int>(&o.min_file_sz_),                      "min file size(bytes) to scan")
-      ("file-mask,M",    po::value<std::vector<std::string>>(&o.files_masks_), "files names masks to scan")
+      ("file-mask,M",    po::value<std::vector<std::string>>(&o.files_masks_), "files names masks(as regexp) to scan")
       ("block-size,S",   po::value<int>(&o.block_sz_),                         "scan block size(bytes)")
       ("conv,C",         po::value<std::string>(&o.conv_algo_),                "convolution algorithm")
       ;

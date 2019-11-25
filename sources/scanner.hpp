@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
 
 #include "options.hpp"
 
@@ -10,6 +11,9 @@ namespace bayan {
 class files_scanner {
 
 public:
+
+// TODO implement chain of resposibility
+
    files_scanner(const bayan::options& opt) : options_(opt) {};
    ~files_scanner() = default;
 
@@ -25,10 +29,10 @@ public:
       if (files_to_scan.empty()) {
          return;
       }
+   }
 
-
-
-
+   std::vector<std::string> get_all_files() const {
+      return get_files_to_scan();
    }
 
 private:
@@ -48,6 +52,7 @@ private:
                if (need_to_scan(rdi)) {
                   files.push_back(rdi->path().filename().string());
                }
+               ++rdi;
             }
          }
       }
@@ -68,8 +73,18 @@ private:
          return false;
       }
 
-      // TODO check file_name mask
-      return true;
+      // TODO check file size
+      return check_file_name_mask(rdi->path().filename().string());
+   }
+
+   bool check_file_name_mask(const std::string& file_name) const {
+      const auto& filters = options_.files_masks_;
+
+      const auto apply_for = [&file_name] (const auto& condition) {
+         const boost::regex filter{condition};
+         return boost::regex_match(file_name, filter);
+      };
+      return std::all_of(filters.begin(), filters.end(), apply_for);
    }
 
    const bayan::options& options_;
