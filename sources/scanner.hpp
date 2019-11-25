@@ -52,7 +52,12 @@ private:
                if (need_to_scan(rdi)) {
                   files.push_back(rdi->path().filename().string());
                }
-               ++rdi;
+               boost::system::error_code ec;
+               rdi.increment(ec);
+
+               if (ec) {
+                  std::cout << "error accessing to: " << rdi->path().string() << ", " << ec.message() << std::endl;
+               }
             }
          }
       }
@@ -64,12 +69,15 @@ private:
    }
 
    // see: https://thispointer.com/c-get-the-list-of-all-files-in-a-given-directory-and-its-sub-directories-using-boost-c17/
-   bool need_to_scan(const boost::filesystem::recursive_directory_iterator& rdi) const {
+   bool need_to_scan(boost::filesystem::recursive_directory_iterator& rdi) const {
       namespace fs = boost::filesystem;
       const auto& excl_dirs = options_.excl_dirs_;
 
-      if (fs::is_directory(rdi->path()) &&
-         (options_.recursive_ == 0 || std::find(excl_dirs.begin(), excl_dirs.end(), rdi->path().filename()) != excl_dirs.end() )) {
+      if (fs::is_directory(rdi->path())) {
+         if (options_.recursive_ == 0 || std::find(excl_dirs.begin(), excl_dirs.end(), rdi->path().string()) != excl_dirs.end()) {
+//          std::cout << "do not check: " << rdi->path().string() << std::endl;
+            rdi.no_push();
+         }
          return false;
       }
 
@@ -99,7 +107,7 @@ private:
       if (!ec) {
          return file_size >= size;
       }
-      std::cout << "file '" << file_name << "' attribute reading error: " << ec << std::endl;
+      std::cout << "file '" << file_name << "' attribute reading error: " << ec.message() << std::endl;
       return false;
    }
 

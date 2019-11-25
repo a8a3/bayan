@@ -13,8 +13,8 @@ struct options {
    std::string              conv_algo_{"md5"};
 
    unsigned int min_file_sz_{1};
-   unsigned int block_sz_   {1};
-   bool recursive_ {false};
+   unsigned int recursive_ {0};
+   unsigned int block_sz_ {1};
 };
 
 // ------------------------------------------------------------------
