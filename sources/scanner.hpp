@@ -73,18 +73,34 @@ private:
          return false;
       }
 
-      // TODO check file size
+      // TODO always check to non-empty files(size of file must be greater than 0)
+      if (options_.min_file_sz_ > 1 && !check_file_size(rdi->path().string(), options_.min_file_sz_)) {
+         return false;
+      }
       return check_file_name_mask(rdi->path().filename().string());
    }
 
    bool check_file_name_mask(const std::string& file_name) const {
       const auto& filters = options_.files_masks_;
 
-      const auto apply_for = [&file_name] (const auto& condition) {
+      const auto match_by_mask = [&file_name] (const auto& condition) {
          const boost::regex filter{condition};
          return boost::regex_match(file_name, filter);
       };
-      return std::all_of(filters.begin(), filters.end(), apply_for);
+      return std::all_of(filters.begin(), filters.end(), match_by_mask);
+   }
+
+   bool check_file_size(const std::string& file_name, const size_t size) const {
+      namespace fs = boost::filesystem;
+
+      boost::system::error_code ec;
+      const auto file_size = fs::file_size(file_name, ec);
+
+      if (!ec) {
+         return file_size >= size;
+      }
+      std::cout << "file '" << file_name << "' attribute reading error: " << ec << std::endl;
+      return false;
    }
 
    const bayan::options& options_;

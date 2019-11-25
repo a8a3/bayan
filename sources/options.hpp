@@ -12,9 +12,9 @@ struct options {
    std::vector<std::string> files_masks_;
    std::string              conv_algo_{"md5"};
 
-   int min_file_sz_{1};
-   int recursive_  {0};
-   int block_sz_   {1};
+   unsigned int min_file_sz_{1};
+   unsigned int block_sz_   {1};
+   bool recursive_ {false};
 };
 
 // ------------------------------------------------------------------
