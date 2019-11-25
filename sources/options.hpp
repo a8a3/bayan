@@ -5,16 +5,17 @@
 #include <string>
 
 namespace bayan {
+
 // ------------------------------------------------------------------
 struct options {
    std::vector<std::string> in_dirs_;
    std::vector<std::string> excl_dirs_;
    std::vector<std::string> files_masks_;
-   std::string              conv_algo_{"md5"};
+   std::string              conv_algo_;
 
-   unsigned int min_file_sz_{1};
-   unsigned int recursive_ {0};
-   unsigned int block_sz_ {1};
+   unsigned int min_file_sz_;
+   unsigned int recursive_;
+   unsigned int block_sz_;
 };
 
 // ------------------------------------------------------------------
