@@ -11,11 +11,11 @@ struct options {
    std::vector<std::string> in_dirs_;
    std::vector<std::string> excl_dirs_;
    std::vector<std::string> files_masks_;
-   std::string              conv_algo_;
+   std::string              conv_algo_{"md5"};
 
-   unsigned int min_file_sz_;
-   unsigned int recursive_;
-   unsigned int block_sz_;
+   unsigned int min_file_sz_{1};
+   unsigned int recursive_{0};
+   unsigned int block_sz_{1};
 };
 
 // ------------------------------------------------------------------
@@ -24,13 +24,14 @@ std::ostream& operator << (std::ostream& os, const bayan::options& opt) {
    const auto print_str_list = [&os] (const auto head, const auto& list) {
 
       if (list.empty()) {
-         os << head << " none\n";
+         os << head << "none\n";
          return;
       }
-      os << head << '\n';
+      os << head;
       for( const auto& item: list ) {
-         os << item << '\n';
+         os << item << " ";
       }
+      os << '\n';
    };
 
    print_str_list("include dirs: ", opt.in_dirs_);

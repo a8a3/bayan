@@ -4,6 +4,7 @@
 #include <boost/regex.hpp>
 
 #include "options.hpp"
+#include "filters.hpp"
 
 namespace bayan {
 
@@ -14,7 +15,9 @@ public:
 
 // TODO implement chain of resposibility
 
-   files_scanner(const bayan::options& opt) : options_(opt) {};
+   files_scanner(const bayan::options& opt) : options_(opt) {
+      set_filters();
+   };
    ~files_scanner() = default;
 
    void scan() const {
@@ -75,14 +78,12 @@ private:
 
       if (fs::is_directory(rdi->path())) {
          if (options_.recursive_ == 0 || std::find(excl_dirs.begin(), excl_dirs.end(), rdi->path().string()) != excl_dirs.end()) {
-//          std::cout << "do not check: " << rdi->path().string() << std::endl;
             rdi.no_push();
          }
          return false;
       }
 
-      // TODO always check to non-empty files(size of file must be greater than 0)
-      if (options_.min_file_sz_ > 1 && !check_file_size(rdi->path().string(), options_.min_file_sz_)) {
+      if (filter_ && !filter_->apply(rdi)) {
          return false;
       }
       return check_file_name_mask(rdi->path().filename().string());
@@ -111,7 +112,12 @@ private:
       return false;
    }
 
+   void set_filters() {
+      filter_ = std::make_unique<file_size_filter>(options_.min_file_sz_ ? options_.min_file_sz_: 1); // min file size
+   }
+
    const bayan::options& options_;
+   filter::filter_ptr filter_;
 };
 
 } // namespace bayan
