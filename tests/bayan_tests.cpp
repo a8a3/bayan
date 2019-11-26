@@ -51,6 +51,8 @@ BOOST_AUTO_TEST_CASE(exclude_dirs_test)
    options.excl_dirs_.push_back(std::string(test_files_dir + "/excl_dir"));
    options.recursive_ = 1;
 
+   std::cout << options;
+
    bayan::files_scanner scanner{options};
    const auto files = scanner.get_all_files();
    BOOST_CHECK_EQUAL(files.size(), 4);
