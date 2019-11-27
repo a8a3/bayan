@@ -38,7 +38,6 @@ BOOST_AUTO_TEST_CASE(file_size_filter_test)
    BOOST_CHECK_EQUAL(files.size(), 2);
 }
 
-// TODO check files names list, not files count
 // ------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(exclude_dirs_test)
 {
@@ -56,4 +55,28 @@ BOOST_AUTO_TEST_CASE(exclude_dirs_test)
    bayan::files_scanner scanner{options};
    const auto files = scanner.get_all_files();
    BOOST_CHECK_EQUAL(files.size(), 4);
+}
+
+// ------------------------------------------------------------------
+BOOST_AUTO_TEST_CASE(file_chunks_reading_test)
+{
+   namespace fs = boost::filesystem;
+   bayan::options options;
+   options.block_sz_ = 1;
+   
+   std::cout << options;
+
+   bayan::files_scanner scanner{options};
+   const auto file_name = fs::current_path().parent_path().string() + "/tests/data/files4reading/file1.dat";
+
+   BOOST_CHECK(fs::is_regular_file(file_name));
+
+   bool no_eof = true;
+   int chunk_ind{0};
+   do {
+      const auto data = bayan::files_scanner::get_file_chunk(file_name, chunk_ind, 2);
+      std::cout << data.first << '\n';
+      ++chunk_ind;
+      no_eof = data.second;
+   } while(no_eof);
 }

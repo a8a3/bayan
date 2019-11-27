@@ -8,8 +8,9 @@ endif()
 
 find_package(Boost
         COMPONENTS
-        program_options
         filesystem
+        iostreams
+        program_options
         regex
         unit_test_framework
         REQUIRED)
