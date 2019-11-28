@@ -32,7 +32,7 @@ const hashes dict = boost::assign::list_of<hashes::relation>
 (std::string("crc32"), 1);
 
 // ------------------------------------------------------------------
-hash_algorithm get_has_algorithm(const std::string& str_value) {
+hash_algorithm get_hash_algorithm(const std::string& str_value) {
    const auto it = dict.left.find(str_value);
 
    if (it == dict.left.end()) {

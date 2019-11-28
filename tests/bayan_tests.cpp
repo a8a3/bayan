@@ -59,14 +59,14 @@ BOOST_AUTO_TEST_CASE(exclude_dirs_test)
 }
 
 // ------------------------------------------------------------------
-BOOST_AUTO_TEST_CASE(file_chunks_reading_test)
+BOOST_AUTO_TEST_CASE(file_chunks_comparison_test)
 {
    namespace fs = boost::filesystem;
    bayan::options options;
    options.block_sz_ = 1;
    bayan::files_scanner scanner{options};
    const auto file1_name = fs::current_path().parent_path().string() + "/tests/data/files4reading/file1.dat";
-   const auto file2_name = fs::current_path().parent_path().string() + "/tests/data/files4reading/file1.dat";
+   const auto file2_name = fs::current_path().parent_path().string() + "/tests/data/files4reading/file2.dat";
 
    BOOST_CHECK(fs::is_regular_file(file1_name));
    BOOST_CHECK(fs::is_regular_file(file2_name));
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(file_chunks_reading_test)
    bool no_eof = true;
    int chunk_ind{0};
    constexpr auto size = 2;
-   const auto crc32_algo = get_has_algorithm("crc32");
-   const auto std_algo = get_has_algorithm("std");
+   const auto crc32_algo = get_hash_algorithm("crc32");
+   const auto std_algo = get_hash_algorithm("std");
 
    do {
       const auto data1 = bayan::files_scanner::get_file_chunk(file1_name, chunk_ind*size, size);
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(file_chunks_reading_test)
       BOOST_CHECK_EQUAL(hash_crc32_1, hash_crc32_2);
       BOOST_CHECK_EQUAL(hash_std_1, hash_std_2);
 
-      std::cout << data1.first.size() << " : " << data1.first << ", crc32 hash 1: " << hash_crc32_1 << ", std hash: " << hash_std_1 << '\n';
-      std::cout << data2.first.size() << " : " << data2.first << ", crc32 hash 2: " << hash_crc32_2 << ", std hash: " << hash_std_2 << '\n';
+      // std::cout << data1.first.size() << " : " << data1.first << ", crc32 hash 1: " << hash_crc32_1 << ", std hash: " << hash_std_1 << '\n';
+      // std::cout << data2.first.size() << " : " << data2.first << ", crc32 hash 2: " << hash_crc32_2 << ", std hash: " << hash_std_2 << '\n';
       ++chunk_ind;
       no_eof = data1.second || data2.second;
    } while( no_eof );

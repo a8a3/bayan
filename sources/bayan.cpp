@@ -15,13 +15,13 @@ int main(int argc, char** argv) {
       po::options_description opt_desc("command line options");
       opt_desc.add_options()
       ("help,h", "produce help message")
-      ("include-dirs,I", po::value<std::vector<std::string>>(&o.in_dirs_),               "include directories for scan")
-      ("exclude-dirs,E", po::value<std::vector<std::string>>(&o.excl_dirs_),             "exclude directories for scan")
-      ("file-mask,M",    po::value<std::vector<std::string>>(&o.files_masks_),           "files names masks(as regexp) to scan")
-      ("recursive,R",  po::value<unsigned int>(&o.recursive_)->default_value(0),    "0- scan current directory, 1- recursive scan")
-      ("min-size,B",   po::value<unsigned int>(&o.min_file_sz_)->default_value(1),  "min file size(bytes) to scan")
-      ("block-size,S", po::value<unsigned int>(&o.block_sz_)->default_value(1),     "scan block size(bytes)")
-      ("conv,C",       po::value<std::string>(&o.conv_algo_)->default_value("md5"), "convolution algorithm")
+      ("include-dirs,I", po::value<std::vector<std::string>>(&o.in_dirs_),    "include directories for scan")
+      ("exclude-dirs,E", po::value<std::vector<std::string>>(&o.excl_dirs_),    "exclude directories for scan")
+      ("file-mask,M",    po::value<std::vector<std::string>>(&o.files_masks_),    "files names masks(as regexp) to scan")
+      ("recursive,R",    po::value<unsigned int>(&o.recursive_)->default_value(0),    "0- scan current directory, 1- recursive scan")
+      ("min-size,B",     po::value<unsigned int>(&o.min_file_sz_)->default_value(1),    "min file size(bytes) to scan")
+      ("block-size,S",   po::value<unsigned int>(&o.block_sz_)->default_value(1),    "scan block size(bytes)")
+      ("conv,C",         po::value<std::string>(&o.conv_algo_)->default_value("md5"),    "convolution algorithm")
       ;
 
       po::variables_map vm;
