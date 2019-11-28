@@ -7,6 +7,7 @@
 
 #include "options.hpp"
 #include "filters.hpp"
+#include "hash.hpp"
 
 namespace bayan {
 
@@ -42,14 +43,13 @@ public:
    }
 
    using chunk_data = std::pair<std::string, bool>;
-   static chunk_data get_file_chunk(const std::string& file_name, const size_t chunk_ind, const size_t chunk_size) {
-// TODO vector?
+   static chunk_data get_file_chunk(const std::string& file_name, size_t offset, size_t size) {
 // формировать корзины файлов, одинаковых для итерации чтения
 // первый набор корзин- файлы отобраны по размеру(дорого ли узнать размер файла?)
-      std::string chunk(chunk_size, '\0');     
+      std::string chunk(size, '\0');
       std::ifstream s(file_name, std::ifstream::binary);
-      s.seekg(chunk_ind * chunk_size);
-      s.read(&chunk[0], chunk_size);
+      s.seekg(offset);
+      s.read(&chunk[0], size);
       return {chunk, !s.eof()};      
    }
 
