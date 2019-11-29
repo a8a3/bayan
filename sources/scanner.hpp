@@ -68,7 +68,7 @@ private:
 
             while (rdi != end) {
                if (filter_->apply(rdi)) {
-                  files.push_back(rdi->path().filename().string());
+                  files.push_back(rdi->path().string());
                }
 
                boost::system::error_code ec;

@@ -2,15 +2,18 @@
 #define BOOST_TEST_MODULE bayan_test
 #include <boost/test/unit_test.hpp>
 
+#include <queue>
 
 #include <iostream>
-#include "scanner.hpp"
-#include "hash.hpp"
+#include <scanner.hpp>
+#include <hash.hpp>
+#include <files_basket.hpp>
+
+namespace fs = boost::filesystem;
 
 // ------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(file_name_filter_test)
 {
-   namespace fs = boost::filesystem;
    const auto test_files_dir{fs::current_path().parent_path().string() + "/tests/data/file_name_mask_test"};
 
    BOOST_CHECK(fs::is_directory(test_files_dir));
@@ -26,7 +29,6 @@ BOOST_AUTO_TEST_CASE(file_name_filter_test)
 // ------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(file_size_filter_test)
 {
-   namespace fs = boost::filesystem;
    const auto test_files_dir{fs::current_path().parent_path().string() + "/tests/data/file_size_test"};
 
    BOOST_CHECK(fs::is_directory(test_files_dir));
@@ -42,7 +44,6 @@ BOOST_AUTO_TEST_CASE(file_size_filter_test)
 // ------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(exclude_dirs_test)
 {
-   namespace fs = boost::filesystem;
    const auto test_files_dir{fs::current_path().parent_path().string() + "/tests/data/excl_dirs_test"};
 
    BOOST_CHECK(fs::is_directory(test_files_dir));
@@ -61,15 +62,14 @@ BOOST_AUTO_TEST_CASE(exclude_dirs_test)
 // ------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(file_chunks_comparison_test)
 {
-   namespace fs = boost::filesystem;
    bayan::options options;
    options.block_sz_ = 1;
    bayan::files_scanner scanner{options};
    const auto file1_name = fs::current_path().parent_path().string() + "/tests/data/files4reading/file1.dat";
    const auto file2_name = fs::current_path().parent_path().string() + "/tests/data/files4reading/file2.dat";
 
-   BOOST_CHECK(fs::is_regular_file(file1_name));
-   BOOST_CHECK(fs::is_regular_file(file2_name));
+   BOOST_REQUIRE(fs::exists(file1_name));
+   BOOST_REQUIRE(fs::exists(file2_name));
 
    bool no_eof = true;
    int chunk_ind{0};
@@ -89,9 +89,55 @@ BOOST_AUTO_TEST_CASE(file_chunks_comparison_test)
       BOOST_CHECK_EQUAL(hash_crc32_1, hash_crc32_2);
       BOOST_CHECK_EQUAL(hash_std_1, hash_std_2);
 
-      // std::cout << data1.first.size() << " : " << data1.first << ", crc32 hash 1: " << hash_crc32_1 << ", std hash: " << hash_std_1 << '\n';
-      // std::cout << data2.first.size() << " : " << data2.first << ", crc32 hash 2: " << hash_crc32_2 << ", std hash: " << hash_std_2 << '\n';
+       std::cout << data1.first.size() << " : " << data1.first << ", crc32 hash 1: " << hash_crc32_1 << ", std hash: " << hash_std_1 << '\n';
+       std::cout << data2.first.size() << " : " << data2.first << ", crc32 hash 2: " << hash_crc32_2 << ", std hash: " << hash_std_2 << '\n';
       ++chunk_ind;
       no_eof = data1.second || data2.second;
    } while( no_eof );
+}
+
+// ------------------------------------------------------------------
+BOOST_AUTO_TEST_CASE(file_baskets_test)
+{
+   const auto test_files_dir{fs::current_path().parent_path().string() + "/tests/data/files4comparison"};
+
+   BOOST_CHECK(fs::is_directory(test_files_dir));
+   bayan::options options;
+   options.in_dirs_.push_back(test_files_dir);
+   options.recursive_ = 0;
+   options.block_sz_ = 2;
+
+   std::cout << options;
+
+   bayan::files_scanner scanner{options};
+   const auto files = scanner.get_all_files();
+   BOOST_CHECK_EQUAL(files.size(), 5);
+
+   basket b;
+   std::copy(files.begin(), files.end(), std::back_inserter(b.files));
+   BOOST_CHECK_EQUAL(b.files.size(), 5);
+
+   auto& childs = b.childs;
+
+   size_t i{0};
+
+//   std::queue<basket> qb;
+//   qb.push(b);
+//
+//   do {
+//
+//      const auto& basket = qb.front();
+//
+//   } while(!qb.empty());
+
+
+   for (const auto& file : b.files) {
+      const auto chunk = bayan::files_scanner::get_file_chunk(file, options.block_sz_*i, options.block_sz_);
+//    std::cout << chunk.first << std::endl;
+      auto hash = get_hash(chunk.first, hash_algorithm::std);
+      auto& child = childs[hash];
+      child.files.push_back(file);
+   }
+
+   BOOST_CHECK_EQUAL(b.childs.begin()->second.files.size(), 5);
 }
