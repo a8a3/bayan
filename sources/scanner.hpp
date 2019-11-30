@@ -14,14 +14,16 @@ namespace bayan {
 // ------------------------------------------------------------------
 class files_scanner {
    
-
 public:
+   // ---------------------------------------------------------------
    files_scanner(const bayan::options& opt) : options_(opt) {
       set_filters();
    };
 
+   // ---------------------------------------------------------------
    ~files_scanner() = default;
 
+   // ---------------------------------------------------------------
    void scan() const {
       const auto& input_dirs = options_.in_dirs_;
 
@@ -38,22 +40,7 @@ public:
       do_scan(files_to_scan);
    }
 
-   std::vector<std::string> get_all_files() const {
-      return get_files_to_scan();
-   }
-
-   using chunk_data = std::pair<std::string, bool>;
-   static chunk_data get_file_chunk(const std::string& file_name, size_t offset, size_t size) {
-// формировать корзины файлов, одинаковых для итерации чтения
-// первый набор корзин- файлы отобраны по размеру(дорого ли узнать размер файла?)
-      std::string chunk(size, '\0');
-      std::ifstream s(file_name, std::ifstream::binary);
-      s.seekg(offset);
-      s.read(&chunk[0], size);
-      return {chunk, !s.eof()};      
-   }
-
-private:
+   // ---------------------------------------------------------------
    std::vector<std::string> get_files_to_scan() const {
       namespace fs = boost::filesystem;
       std::vector<std::string> files;
@@ -87,6 +74,26 @@ private:
       return files;
    }
 
+   using chunk_data = std::pair<std::string, bool>;
+   // ---------------------------------------------------------------
+   static chunk_data get_file_chunk(const std::string& file_name, size_t offset, size_t size) {
+      std::string chunk(size, '\0');
+      std::ifstream s(file_name, std::ifstream::binary);
+      s.seekg(offset);
+      s.read(&chunk[0], size);
+      return {chunk, s.eof()};      
+   }
+
+private:
+   // ---------------------------------------------------------------
+   void do_scan(const std::vector<std::string>& files) const{
+      basket b;
+      std::copy(files.begin(), files.end(), std::back_inserter(b.files));
+      const auto hash_algo = get_hash_algorithm(options_.conv_algo_);
+      build_files_baskets(b, 0, hash_algo);
+   }
+
+   // ---------------------------------------------------------------
    void set_filters() {
       filter_ = std::make_unique<file_size_filter>(options_.min_file_sz_ ? options_.min_file_sz_: 1);
 
@@ -99,28 +106,43 @@ private:
       }
    }
 
-// 0 1 2 3 4 5    0 2 4   1 3 5
-// A A A A A A    A A A   A A A
-// B D B D B D => B B B   D D D
-// C E H F C F    C H C , E F F
+   // ---------------------------------------------------------------
+   struct basket {
+      size_t index{0};
+      std::list<std::string>   files;
+      std::map<size_t, basket> childs;
+      bool is_last{false};
+   };
 
-// A hash 0,1,2,3,4,5
-// B hash 0,2,4
-// D hash 1,3,5
+   // ---------------------------------------------------------------
+   void build_files_baskets(basket& b, size_t chunk_ind, hash_algorithm hash_algo) const{
 
-// hash -> key
-// list -> value
+      if (b.is_last && b.files.size() > 1) {        
+         std::cout << "the same files are: " << std::endl;
+      
+         for (const auto& file: b.files) {
+               std::cout << file << std::endl;
+         }
+         std::cout << std::endl;
+         return;
+      }
 
-// TODO make private
-public:
+      for (const auto& file : b.files) {
+         const auto chunk = get_file_chunk(file, chunk_ind*options_.block_sz_, options_.block_sz_);
+         const auto hash = get_hash(chunk.first, hash_algo);
+      
+         auto& child = b.childs[hash];
+         child.files.push_back(file);
+         child.is_last = chunk.second;
+      }
 
-   void do_scan(const std::vector<std::string>& files_to_scan) const {
-      namespace fs = boost::filesystem;
-      std::cout << "attempt to scan " << files_to_scan.size() << " files\n";
-
-//      https://www.boost.org/doc/libs/1_68_0/libs/iostreams/doc/classes/mapped_file.html#installation
-//      fs::ifstream ifs;
-   }
+      for (auto& child : b.childs) {
+         auto& child_basket = child.second;
+         if (child_basket.files.size() > 1) {
+            build_files_baskets(child_basket, ++chunk_ind, hash_algo);
+         }
+      }
+   } 
 
    const bayan::options& options_;
    filter::filter_ptr filter_;

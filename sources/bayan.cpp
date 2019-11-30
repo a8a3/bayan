@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
       ("recursive,R",    po::value<unsigned int>(&o.recursive_)->default_value(0),    "0- scan current directory, 1- recursive scan")
       ("min-size,B",     po::value<unsigned int>(&o.min_file_sz_)->default_value(1),    "min file size(bytes) to scan")
       ("block-size,S",   po::value<unsigned int>(&o.block_sz_)->default_value(1),    "scan block size(bytes)")
-      ("conv,C",         po::value<std::string>(&o.conv_algo_)->default_value("md5"),    "convolution algorithm")
+      ("conv,C",         po::value<std::string>(&o.conv_algo_)->default_value("crc32"),    "convolution algorithm")
       ;
 
       po::variables_map vm;

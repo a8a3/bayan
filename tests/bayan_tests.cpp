@@ -7,7 +7,6 @@
 #include <iostream>
 #include <scanner.hpp>
 #include <hash.hpp>
-#include <files_basket.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -22,7 +21,7 @@ BOOST_AUTO_TEST_CASE(file_name_filter_test)
    options.files_masks_.push_back(R"(test_file\S*)");
 
    bayan::files_scanner scanner{options};
-   const auto files = scanner.get_all_files();
+   const auto files = scanner.get_files_to_scan();
    BOOST_CHECK_EQUAL(files.size(), 2);
 }
 
@@ -37,7 +36,7 @@ BOOST_AUTO_TEST_CASE(file_size_filter_test)
    options.min_file_sz_ = 5;
 
    bayan::files_scanner scanner{options};
-   const auto files = scanner.get_all_files();
+   const auto files = scanner.get_files_to_scan();
    BOOST_CHECK_EQUAL(files.size(), 2);
 }
 
@@ -55,7 +54,7 @@ BOOST_AUTO_TEST_CASE(exclude_dirs_test)
    std::cout << options;
 
    bayan::files_scanner scanner{options};
-   const auto files = scanner.get_all_files();
+   const auto files = scanner.get_files_to_scan();
    BOOST_CHECK_EQUAL(files.size(), 4);
 }
 
@@ -105,39 +104,13 @@ BOOST_AUTO_TEST_CASE(file_baskets_test)
    bayan::options options;
    options.in_dirs_.push_back(test_files_dir);
    options.recursive_ = 0;
-   options.block_sz_ = 2;
+   options.block_sz_ = 4;
+   options.conv_algo_ = "crc32";
 
    std::cout << options;
 
    bayan::files_scanner scanner{options};
-   const auto files = scanner.get_all_files();
+   const auto files = scanner.get_files_to_scan();
    BOOST_CHECK_EQUAL(files.size(), 5);
-
-   basket b;
-   std::copy(files.begin(), files.end(), std::back_inserter(b.files));
-   BOOST_CHECK_EQUAL(b.files.size(), 5);
-
-   auto& childs = b.childs;
-
-   size_t i{0};
-
-//   std::queue<basket> qb;
-//   qb.push(b);
-//
-//   do {
-//
-//      const auto& basket = qb.front();
-//
-//   } while(!qb.empty());
-
-
-   for (const auto& file : b.files) {
-      const auto chunk = bayan::files_scanner::get_file_chunk(file, options.block_sz_*i, options.block_sz_);
-//    std::cout << chunk.first << std::endl;
-      auto hash = get_hash(chunk.first, hash_algorithm::std);
-      auto& child = childs[hash];
-      child.files.push_back(file);
-   }
-
-   BOOST_CHECK_EQUAL(b.childs.begin()->second.files.size(), 5);
+   scanner.scan();
 }
