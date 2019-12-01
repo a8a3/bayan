@@ -11,7 +11,6 @@ find_package(Boost
         filesystem
         iostreams
         program_options
-        regex
         unit_test_framework
         REQUIRED)
 

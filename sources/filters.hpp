@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <regex>
 #include <boost/filesystem.hpp>
 
 
@@ -74,8 +75,8 @@ public:
       const auto file_name = iter->path().filename().string();
 
       const auto match_by_mask = [&file_name] (const auto& condition) {
-         const boost::regex filter{condition};
-         return boost::regex_match(file_name, filter);
+         const std::regex filter{condition};
+         return std::regex_match(file_name, filter);
       };
       return std::all_of(files_masks_.cbegin(), files_masks_.cend(), match_by_mask);
    }

@@ -3,7 +3,6 @@
 #include <fstream>
 
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
 
 #include "options.hpp"
 #include "filters.hpp"
