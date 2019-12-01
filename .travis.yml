@@ -1,0 +1,30 @@
+language: cpp
+# safelist
+branches:
+  only:
+  - master
+before_script:
+- sudo apt-get install libboost-all-dev -y
+- sudo apt-get install libboost-test-dev -y
+- echo "deb http://archive.ubuntu.com/ubuntu xenial main universe" | sudo tee -a /etc/apt/sources.list
+- sudo apt-get update -qq
+before_install:
+  # C++17
+  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+# Install dependencies
+install: 
+  # C++17
+  - sudo apt-get install -qq g++-7
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+script:
+- gcc --version
+- cd $TRAVIS_BUILD_DIR && mkdir build && cd build
+- cmake ..
+- cmake --build .
+- cmake --build . --target package
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+  - curl -T bayan-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -ua8a3:$BINTRAY_API_KEY "https://api.bintray.com/content/fakecompany/otus/bayan/$TRAVIS_BUILD_NUMBER/bayan-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
