@@ -25,9 +25,7 @@ set_target_properties(bayan PROPERTIES
 
 target_link_libraries(bayan
     PRIVATE
-        Boost::program_options
-        Boost::filesystem
-        Boost::regex
+        ${Boost_LIBRARIES}
 )
 
 target_include_directories(bayan_tests
@@ -38,9 +36,7 @@ target_include_directories(bayan_tests
 
 target_link_libraries(bayan_tests
     PRIVATE
-        Boost::unit_test_framework
-        Boost::filesystem
-        Boost::regex
+        ${Boost_LIBRARIES}
 )
 
 target_compile_definitions(bayan_tests
